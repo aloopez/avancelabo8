@@ -56,8 +56,21 @@ document.getElementById("newUserForm").addEventListener("submit", async function
         alert('No se pudo conectar al servidor');
     }
 });
+
 //how to change register form display none to showing
-document.getElementById("registerButton").addEventListener("click", function() {
-    document.getElementById("registerForm").style.display = "block";
-    document.getElementById("loginForm").style.display = "none";
-});
+function toggleForms() {
+    const loginFormContainer = document.getElementById("loginFormContainer");
+    const registerFormContainer = document.getElementById("registerFormContainer");
+    const toggleButton = document.getElementById("registerButton");
+
+    if (loginFormContainer.style.display === "none") {
+        loginFormContainer.style.display = "block";
+        registerFormContainer.style.display = "none";
+        toggleButton.textContent = "Registrarse";
+    } else {
+        loginFormContainer.style.display = "none";
+        registerFormContainer.style.display = "block";
+        toggleButton.textContent = "Iniciar Sesión";
+    }
+}
+document.getElementById("registerButton").addEventListener("click", toggleForms);
