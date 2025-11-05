@@ -3,10 +3,11 @@ import jwt from "jsonwebtoken";
 import bodyParser from "body-parser";
 import cors from "cors";
 import router from "./routes/userRoutes.js";
+import 'dotenv/config';
 
 const app = express();
-const PORT = 5001;
-const JWT_SECRET = "hola"; // Use a strong, secure key in production
+const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 app.use(bodyParser.json());
 app.use(cors());
