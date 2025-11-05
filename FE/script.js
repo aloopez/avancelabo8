@@ -8,7 +8,7 @@ document
     const password = document.getElementById("password").value;
 
     try {
-      const resp = await fetch("http://localhost:5001/signIn", {
+      const resp = await fetch("http://localhost:5001/api/signIn", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +40,7 @@ document
     const newEmail = document.getElementById("newEmail").value;
     const newPasswd = document.getElementById("newPassword").value;
     try {
-      const resp = await fetch("http://localhost:5001/users", {
+      const resp = await fetch("http://localhost:5001/api/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

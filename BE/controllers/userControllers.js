@@ -1,15 +1,8 @@
-import { Pool } from "pg";
 import bcrypt from "bcrypt";
+import pool from "../config/db.js";
+import jwt from "jsonwebtoken";
 
-const pool = new Pool({
-  user: "neondb_owner",
-  host: "ep-curly-sound-ahcrxe5b-pooler.c-3.us-east-1.aws.neon.tech",
-  database: "neondb",
-  password: "npg_WUmQdXwNZ2f6",
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+const JWT_SECRET = "hola"; // Use a strong, secure key in production
 
 const getUsers = (request, response) => {
   pool.query("SELECT * FROM users ORDER BY id ASC", (error, results) => {
@@ -85,11 +78,35 @@ const deleteUser = (request, response) => {
   });
 };
 
-export default {
-  getUsers,
-  getUserById,
-  createUser,
-  updateUser,
-  deleteUser,
-  pool,
+const signIn = async (request, response) => {
+  // Implementar lógica de inicio de sesión aquí
+  try {
+    const { email, password } = request.body;
+    // Buscar usuario en la DB (ejemplo con pool)
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+    if (result.rows.length === 0)
+      return response
+        .status(401)
+        .json({ message: "Usuario/contraseña inválidos" });
+    const user = result.rows[0];
+    // Comparar contraseña (suponiendo que user.passwd está hasheada)
+    const match = await bcrypt.compare(password, user.password);
+    if (!match)
+      return response
+        .status(401)
+        .json({ message: "Usuario/contraseña inválidos" });
+    // Firmar token
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    return response.json({ token });
+  } catch (err) {
+    console.error(err);
+    return response.status(500).json({ message: "Error del servidor" });
+  }
+
 };
+
+export { getUsers, getUserById, createUser, updateUser, deleteUser, signIn };

@@ -1,9 +1,8 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 import bodyParser from "body-parser";
 import cors from "cors";
-import db from "./data/index.js";
+import router from "./routes/userRoutes.js";
 
 const app = express();
 const PORT = 5001;
@@ -34,40 +33,12 @@ const verifyToken = (req, res, next) => {
 };
 
 // Routes
-app.post("/signIn", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    // Buscar usuario en la DB (ejemplo con pool)
-    const result = await db.pool.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
-    if (result.rows.length === 0)
-      return res.status(401).json({ message: "Usuario/contraseña inválidos" });
-    const user = result.rows[0];
-    // Comparar contraseña (suponiendo que user.passwd está hasheada)
-    const match = await bcrypt.compare(password, user.password);
-    if (!match)
-      return res.status(401).json({ message: "Usuario/contraseña inválidos" });
-    // Firmar token
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-      expiresIn: "1h",
-    });
-    return res.json({ token });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Error del servidor" });
-  }
-});
 
-app.get("/protected", verifyToken, (req, res) => {
+app.use("/api", router);
+
+app.get("/api/protected", verifyToken, (req, res) => {
   res.status(200).json({ message: "Protected data accessed", user: req.user });
 });
-
-app.get("/users", db.getUsers);
-app.get("/users/:id", db.getUserById);
-app.post("/users", db.createUser);
-app.put("/users/:id", db.updateUser);
-app.delete("/users/:id", db.deleteUser);
 
 app.listen(PORT, () =>
   console.log(`Server running at http://localhost:${PORT}`)
